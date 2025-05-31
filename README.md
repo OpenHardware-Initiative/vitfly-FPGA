@@ -156,12 +156,15 @@ Please fly safely!
 
 ## Citation
 
+If you found this code useful in your work then please consider citing the following paper:
+
 ```
-@article{bhattacharya2024vision,
-  title={Vision Transformers for End-to-End Vision-Based Quadrotor Obstacle Avoidance},
+@inproceedings{bhattacharya2025vision,
+  title={Vision transformers for end-to-end vision-based quadrotor obstacle avoidance},
   author={Bhattacharya, Anish and Rao, Nishanth and Parikh, Dhruv and Kunapuli, Pratik and Wu, Yuwei and Tao, Yuezhan and Matni, Nikolai and Kumar, Vijay},
-  journal={arXiv preprint arXiv:2405.10391},
-  year={2024}
+  booktitle={2025 IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2025},
+  organization={IEEE}
 }
 ```
 
