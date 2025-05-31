@@ -37,10 +37,10 @@ catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-fdiagno
 
 #### Clone this repository and set up
 
-Once inside your desired workspace, clone this repository (note, we rename it to `vitfly`):
+Once inside your desired workspace, clone this repository (note, we renamed it to `vitfly`):
 ```
 cd ~/catkin_ws/src
-git clone git@github.com:anish-bhattacharya/ViT-for-quadrotor-obstacle-avoidance.git vitfly
+git clone git@github.com:anish-bhattacharya/vitfly.git
 cd vitfly
 ```
 
