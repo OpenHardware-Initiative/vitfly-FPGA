@@ -13,7 +13,7 @@ from std_msgs.msg import String
 from envsim_msgs.msg import ObstacleArray
 
 # from rl_example import load_rl_policy
-from user_code import compute_command_vision_based, compute_command_state_based
+from user_code_FPGA import compute_command_vision_based, compute_command_state_based
 from utils import AgileCommandMode, AgileQuadState
 
 import time
@@ -241,7 +241,7 @@ class AgilePilotNode:
         if self.state is None:
             return
         
-        # print('[RUN_COMPETITION] calling compute_command_vision_based')
+        print('[RUN_COMPETITION] calling compute_command_vision_based')
         start_compute_time = time.time()
 
         command, (debug_img1, debug_img2), self.model_hidden_state = compute_command_vision_based(self.state, img, self.prevImg,self.desiredVel, self.model, self.model_hidden_state)
@@ -254,7 +254,8 @@ class AgilePilotNode:
             print(f'[RUN_COMPETITION] compute_command_vision_based took {time.time() - start_compute_time} seconds')
 
         self.publish_command(command)
-        # print(f'[RUN_COMPETITION] output: {command.velocity}')
+        print(f'[RUN_COMPETITION] output: {command.velocity}')
+        print(f'[RUN_COMPETITION] output FULL COMMAND: {command}')
 
         if self.state.pos[0] < 0.1:
             self.start_time = command.t
@@ -468,7 +469,7 @@ class AgilePilotNode:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Agile Pilot.")
     parser.add_argument("--vision_based", help="Fly vision-based", required=False, dest="vision_based", action="store_true")
-    parser.add_argument('--model_type', type=str, default='LSTMNet', help='string matching model name in lstmArch.py')
+    parser.add_argument('--model_type', type=str, default='ViTLSTM', help='string matching model name in lstmArch.py')
     parser.add_argument('--model_path', type=str, default=None, help='absolute path to model checkpoint')
     parser.add_argument('--des_vel', type=float, default=None, help='desired velocity for quadrotor')
     parser.add_argument("--keyboard", help="Fly state-based mode but take velocity commands from keyboard WASD", required=False, dest="keyboard", action="store_true")
