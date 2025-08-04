@@ -18,7 +18,7 @@ from torch.utils.tensorboard import SummaryWriter
 import torch.nn as nn
 import torch.nn.functional as F
 
-from dataloading import *
+from .dataloading import *
 sys.path.append(opj(os.path.dirname(os.path.abspath(__file__)), '../models'))
 import model as model_library
 
