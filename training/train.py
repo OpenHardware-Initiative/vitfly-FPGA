@@ -22,6 +22,13 @@ from .dataloading import *
 sys.path.append(opj(os.path.dirname(os.path.abspath(__file__)), '../models'))
 import model as model_library
 
+# Get the absolute path of the project root directory
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
+# Add the project root to the Python path
+sys.path.insert(0, project_root)
+from models.ITA.ITA_model import ITALSTMNetVITFloat
+
 # NOTE this suppresses tensorflow warnings and info
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import getpass
@@ -128,6 +135,8 @@ class TRAINER:
             self.model = model_library.LSTMNetVIT().to(self.device).float()
         elif self.model_type == 'UNet':
             self.model = model_library.UNetConvLSTMNet().to(self.device).float()
+        elif self.model_type == 'ITAViTLSTMFloat':
+            self.model = ITALSTMNetVITFloat().to(self.device).float()
         else:
             self.mylogger(f'[SETUP] Invalid model_type {self.model_type}. Exiting.')
             exit()
@@ -327,7 +336,7 @@ def argparsing():
     return args
 
 if __name__ == '__main__':
-    torch.set_default_tensor_type('torch.cuda.FloatTensor')
+    #torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
     args = argparsing()
     print(args)
