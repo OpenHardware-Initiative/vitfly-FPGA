@@ -27,7 +27,8 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 
 # Add the project root to the Python path
 sys.path.insert(0, project_root)
-from models.ITA.ITA_model import ITALSTMNetVITFloat
+#from models.ITA.ITA_model import ITALSTMNetVITFloat
+from models.ITA_upsample_shuffle.model import ITALSTMNetVIT
 
 # NOTE this suppresses tensorflow warnings and info
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -135,8 +136,9 @@ class TRAINER:
             self.model = model_library.LSTMNetVIT().to(self.device).float()
         elif self.model_type == 'UNet':
             self.model = model_library.UNetConvLSTMNet().to(self.device).float()
-        elif self.model_type == 'ITAViTLSTMFloat':
-            self.model = ITALSTMNetVITFloat().to(self.device).float()
+        elif self.model_type == 'ITALSTMNetVIT':
+            self.mylogger('[SETUP] Using custom ITALSTMNetVIT model.')
+            self.model = ITALSTMNetVIT().to(self.device).float()
         else:
             self.mylogger(f'[SETUP] Invalid model_type {self.model_type}. Exiting.')
             exit()
@@ -148,6 +150,10 @@ class TRAINER:
             self.load_from_checkpoint(self.checkpoint_path)
 
         self.total_its = self.num_eps_trained * self.num_training_steps
+        
+        if self.args.early_stopping_patience > 0:
+            self.best_val_loss = float('inf')
+            self.patience_counter = 0
 
     def mylogger(self, msg):
         print(msg)
@@ -219,7 +225,23 @@ class TRAINER:
 
             # periodically evaluate on validation set
             if ep % self.val_freq == 0:
-                self.validation(ep)
+                current_val_loss = self.validation(ep)
+
+                # ADD THE EARLY STOPPING LOGIC
+                if self.args.early_stopping_patience > 0:
+                    if current_val_loss < self.best_val_loss:
+                        self.best_val_loss = current_val_loss
+                        self.patience_counter = 0
+                        self.mylogger(f'[EARLY STOPPING] New best validation loss: {self.best_val_loss:.6f}')
+                        # Optionally, you can save the best model here specifically
+                        # self.save_model(ep, is_best=True)
+                    else:
+                        self.patience_counter += 1
+                        self.mylogger(f'[EARLY STOPPING] No improvement. Patience: {self.patience_counter}/{self.args.early_stopping_patience}')
+                    
+                    if self.patience_counter >= self.args.early_stopping_patience:
+                        self.mylogger(f'[EARLY STOPPING] Patience limit reached. Stopping training at epoch {ep}.')
+                        break
 
             ep_loss = 0
             gradnorm = 0
@@ -301,6 +323,8 @@ class TRAINER:
 
             self.mylogger(f'[VAL] Completed validation, val_loss = {ep_loss:.6f}, time taken = {time.time() - val_start:.2f} s')
             self.writer.add_scalar('val/loss', ep_loss, ep)
+            
+            return ep_loss
 
 def argparsing():
 
@@ -329,7 +353,8 @@ def argparsing():
     parser.add_argument('--lr_decay', action='store_true', default=False, help='whether to use lr_decay, hardcoded to exponentially decay to 0.01 * lr by end of training')
     parser.add_argument('--save_model_freq', type=int, default=25, help='frequency with which to save model checkpoints')
     parser.add_argument('--val_freq', type=int, default=10, help='frequency with which to evaluate on validation set')
-
+    parser.add_argument('--early_stopping_patience', type=int, default=20, help='Number of validation checks to wait for improvement before stopping. Set to 0 to disable.')
+    
     args = parser.parse_args()
     print(f'[CONFIGARGPARSE] Parsing args from config file {args.config}')
 
